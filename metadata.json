@@ -1,0 +1,7 @@
+{
+  "name": "SSC Batch 2019 Iftar Mahfil",
+  "description": "A high-end registration and showcase website for the SSC Batch 2019 Iftar Mahfil at Nakla Government Pilot High School.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
