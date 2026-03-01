@@ -381,7 +381,7 @@ const LandingPage = () => {
       {/* Guest Grid */}
       <section className="py-20 bg-emerald-950/50 overflow-hidden">
         <div className="container mx-auto px-4">
-          <h2 className="section-title py-4">অংশগ্রহণকারী সদস্যবৃন্দ ({approvedGuests.length})</h2>
+          <h2 className="section-title py-4 !text-[26px] md:!text-6xl">অংশগ্রহণকারী সদস্যবৃন্দ ({approvedGuests.length})</h2>
           {approvedGuests.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 md:gap-6">
               {approvedGuests.map((guest, idx) => (
