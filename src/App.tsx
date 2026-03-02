@@ -29,7 +29,8 @@ import {
   LayoutDashboard,
   Users,
   Camera,
-  RefreshCw
+  RefreshCw,
+  FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -638,7 +639,7 @@ const AdminDashboard = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const correctPass = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
+    const correctPass = import.meta.env.VITE_ADMIN_PASSWORD || 'asif000';
     if (password === correctPass) {
       setIsLoggedIn(true);
       localStorage.setItem('isAdminLoggedIn', 'true');
@@ -816,6 +817,81 @@ const AdminDashboard = () => {
     }
   };
 
+  const downloadPDF = () => {
+    const approved = registrations.filter(r => r.is_approved);
+    if (approved.length === 0) {
+      alert('কোনো অনুমোদিত মেম্বার নেই!');
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const html = `
+      <html>
+        <head>
+          <title>Member List - SSC Batch 2019</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;700&display=swap');
+            body { font-family: 'Hind Siliguri', sans-serif; padding: 40px; color: #333; }
+            .header { text-align: center; border-bottom: 2px solid #D4AF37; padding-bottom: 20px; margin-bottom: 30px; }
+            h1 { color: #004d40; margin: 0; font-size: 28px; }
+            .subtitle { color: #666; margin-top: 5px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+            th { background-color: #f8f8f8; color: #004d40; font-weight: bold; }
+            tr:nth-child(even) { background-color: #fafafa; }
+            .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; pt-20; }
+            .stats { margin-bottom: 10px; font-weight: bold; color: #D4AF37; }
+            @media print {
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>ইফতার মাহফিল ২০২৬ - অনুমোদিত মেম্বার লিস্ট</h1>
+            <div class="subtitle">এস এস সি ব্যাচ ২০১৯, নকলা সরকারি পাইলট উচ্চ বিদ্যালয়</div>
+          </div>
+          <div class="stats">মোট অনুমোদিত সদস্য: ${approved.length} জন</div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 50px;">ক্রমিক</th>
+                <th>নাম</th>
+                <th>ফোন নাম্বার</th>
+                <th>স্ট্যাটাস</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${approved.map((reg, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td style="font-weight: 500;">${reg.name}</td>
+                  <td>${reg.phone}</td>
+                  <td style="color: green;">Approved</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="footer">
+            রিপোর্ট তৈরির সময়: ${new Date().toLocaleString('bn-BD')} | Developed by Asif Sharker
+          </div>
+          <script>
+            window.onload = function() {
+              setTimeout(() => {
+                window.print();
+              }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
   const filteredRegs = registrations.filter(r => 
     r.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -905,6 +981,12 @@ const AdminDashboard = () => {
                     পরিবর্তন সেভ হয়েছে!
                   </motion.span>
                 )}
+                <button 
+                  onClick={downloadPDF}
+                  className="flex items-center gap-2 bg-gold text-emerald-950 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-gold-light transition-all"
+                >
+                  <FileText size={14} /> PDF ডাউনলোড
+                </button>
                 <p className="text-gold text-sm font-bold">মোট মেম্বার: {registrations.length} জন</p>
               </div>
             </div>
