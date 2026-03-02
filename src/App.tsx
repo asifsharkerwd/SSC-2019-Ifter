@@ -540,12 +540,14 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<'users' | 'gallery' | 'hero' | 'settings'>('users');
   const [uploading, setUploading] = useState(false);
   const [replacingId, setReplacingId] = useState<string | null>(null);
+  const [replacingMemberId, setReplacingMemberId] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const navigate = useNavigate();
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const heroInputRef = useRef<HTMLInputElement>(null);
+  const memberPhotoInputRef = useRef<HTMLInputElement>(null);
   const replaceInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -676,6 +678,33 @@ const AdminDashboard = () => {
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
       }
+    }
+  };
+
+  const handleMemberPhotoUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0] && replacingMemberId) {
+      setUploading(true);
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        const base64Image = reader.result as string;
+        const compressedImage = await compressImage(base64Image, 200, 200);
+        
+        const { error } = await supabase
+          .from('registrations')
+          .update({ photo_url: compressedImage })
+          .eq('id', replacingMemberId);
+
+        if (!error) {
+          setRegistrations(prev => prev.map(r => r.id === replacingMemberId ? { ...r, photo_url: compressedImage } : r));
+          setSaveSuccess(true);
+          setTimeout(() => setSaveSuccess(false), 3000);
+        }
+        
+        setReplacingMemberId(null);
+        setUploading(false);
+      };
     }
   };
 
@@ -848,6 +877,13 @@ const AdminDashboard = () => {
 
         {activeTab === 'users' && (
           <div className="space-y-6">
+            <input 
+              type="file" 
+              ref={memberPhotoInputRef} 
+              onChange={handleMemberPhotoUpdate} 
+              accept="image/*" 
+              className="hidden" 
+            />
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="relative max-w-md w-full">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={20} />
@@ -878,7 +914,21 @@ const AdminDashboard = () => {
                     {filteredRegs.length > 0 ? (
                       filteredRegs.map((reg) => (
                         <tr key={reg.id} className="hover:bg-white/5 transition-colors">
-                          <td className="p-4"><img src={reg.photo_url} className="w-12 h-12 rounded-full object-cover border border-gold/30" /></td>
+                          <td className="p-4">
+                            <div className="relative group/photo w-12 h-12">
+                              <img src={reg.photo_url} className="w-12 h-12 rounded-full object-cover border border-gold/30" />
+                              <button 
+                                onClick={() => {
+                                  setReplacingMemberId(reg.id);
+                                  memberPhotoInputRef.current?.click();
+                                }}
+                                className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover/photo:opacity-100 transition-opacity"
+                                title="ছবি পরিবর্তন করুন"
+                              >
+                                <Upload size={14} className="text-white" />
+                              </button>
+                            </div>
+                          </td>
                           <td className="p-4">
                             <div className="font-medium text-white">{reg.name}</div>
                           </td>
