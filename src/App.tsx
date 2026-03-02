@@ -77,21 +77,21 @@ const syncToGoogleSheets = async (data: any) => {
   if (!sheetsUrl) return;
 
   try {
-    // Using URLSearchParams for better compatibility with Google Apps Script
-    const params = new URLSearchParams();
-    for (const key in data) {
-      params.append(key, data[key]);
-    }
+    // Using a simpler approach for Google Apps Script compatibility
+    const queryString = new URLSearchParams(data).toString();
+    const finalUrl = `${sheetsUrl}?${queryString}`;
 
-    await fetch(sheetsUrl, {
+    // Using a simple fetch with no-cors. 
+    // Sometimes GET is more reliable for GAS redirects in no-cors mode
+    await fetch(finalUrl, {
       method: 'POST',
       mode: 'no-cors',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'text/plain',
       },
-      body: params.toString(),
+      body: JSON.stringify(data)
     });
-    console.log('Google Sheets sync attempted:', data);
+    console.log('Google Sheets sync attempted for:', data.name);
   } catch (err) {
     console.error('Google Sheets sync error:', err);
   }
@@ -435,7 +435,17 @@ const LandingPage = () => {
                   <div className="p-3 text-center bg-black/40">
                     <h3 className="text-white text-[16px] font-bold truncate mb-0.5">{guest.name}</h3>
                     <p className="text-gold text-[14px] uppercase tracking-widest font-medium mb-0.5">SSC Batch 2019</p>
-                    <p className="text-white/60 text-[13px] font-mono">{guest.phone}</p>
+                    <p 
+                      className="text-white/60 text-[13px] font-mono cursor-pointer hover:text-gold transition-colors flex items-center justify-center gap-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(guest.phone);
+                        alert('ফোন নাম্বার কপি করা হয়েছে: ' + guest.phone);
+                      }}
+                      title="কপি করতে ক্লিক করুন"
+                    >
+                      {guest.phone}
+                    </p>
                   </div>
                 </motion.div>
               ))}
