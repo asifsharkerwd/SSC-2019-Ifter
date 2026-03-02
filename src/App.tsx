@@ -496,7 +496,7 @@ const LandingPage = () => {
 // --- Admin Dashboard Page ---
 
 const AdminDashboard = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isAdminLoggedIn') === 'true');
   const [password, setPassword] = useState('');
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
@@ -593,8 +593,16 @@ const AdminDashboard = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const correctPass = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
-    if (password === correctPass) setIsLoggedIn(true);
+    if (password === correctPass) {
+      setIsLoggedIn(true);
+      localStorage.setItem('isAdminLoggedIn', 'true');
+    }
     else alert('ভুল পাসওয়ার্ড!');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem('isAdminLoggedIn');
   };
 
   const updateEventDate = async (date: string) => {
@@ -763,7 +771,7 @@ const AdminDashboard = () => {
           >
             <RefreshCw size={18} />
           </button>
-          <button onClick={() => setIsLoggedIn(false)} className="text-white/60 hover:text-red-400 transition-colors flex items-center gap-2">
+          <button onClick={handleLogout} className="text-white/60 hover:text-red-400 transition-colors flex items-center gap-2">
             <LogOut size={18} /> Logout
           </button>
           <Link to="/" className="text-gold hover:text-white transition-colors"><ChevronLeft size={24} /></Link>
