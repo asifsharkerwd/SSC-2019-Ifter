@@ -265,6 +265,28 @@ const LandingPage = () => {
 
         if (error) throw error;
 
+        // Sync to Google Sheets
+        const sheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_URL || 'https://script.google.com/macros/s/AKfycbxDV9XsTqnSDiIZXjMTxv2-ueURWzniCax-pxQSdDvrfqLlomgaPvHzFM5HKQmQa1L_/exec';
+        if (sheetsUrl) {
+          try {
+            await fetch(sheetsUrl, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                name,
+                phone,
+                status: 'Pending',
+                timestamp: new Date().toLocaleString()
+              }),
+            });
+          } catch (err) {
+            console.error('Google Sheets sync error:', err);
+          }
+        }
+
         setMessage({ type: 'success', text: 'রেজিষ্ট্রেশন সফল হয়েছে! এডমিন অনুমোদনের জন্য অপেক্ষা করুন।' });
         setName('');
         setPhone('');
@@ -620,7 +642,31 @@ const AdminDashboard = () => {
       .eq('id', id);
       
     if (!error) {
-      setRegistrations(prev => prev.map(r => r.id === id ? { ...r, is_approved: !r.is_approved } : r));
+      const newStatus = !reg.is_approved;
+      setRegistrations(prev => prev.map(r => r.id === id ? { ...r, is_approved: newStatus } : r));
+
+      // Sync status update to Google Sheets
+      const sheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_URL || 'https://script.google.com/macros/s/AKfycbxDV9XsTqnSDiIZXjMTxv2-ueURWzniCax-pxQSdDvrfqLlomgaPvHzFM5HKQmQa1L_/exec';
+      if (sheetsUrl) {
+        try {
+          await fetch(sheetsUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: reg.name,
+              phone: reg.phone,
+              status: newStatus ? 'Approved' : 'Pending',
+              timestamp: new Date().toLocaleString(),
+              action: 'update'
+            }),
+          });
+        } catch (err) {
+          console.error('Google Sheets sync error:', err);
+        }
+      }
     }
   };
 
