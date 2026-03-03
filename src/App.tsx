@@ -450,13 +450,13 @@ const LandingPage = () => {
                   <p className="text-pink-400 font-bold text-sm uppercase mb-1">bKash (Send Money)</p>
                   <button 
                     onClick={() => {
-                      navigator.clipboard.writeText('01768705593');
+                      navigator.clipboard.writeText('01996575260');
                       setCopiedNumber('bkash');
                       setTimeout(() => setCopiedNumber(null), 2000);
                     }}
                     className="text-2xl font-mono text-white hover:text-gold transition-colors flex items-center justify-center gap-2 mx-auto"
                   >
-                    01768705593
+                    01996575260
                   </button>
                   <AnimatePresence>
                     {copiedNumber === 'bkash' && (
@@ -486,13 +486,13 @@ const LandingPage = () => {
                   <p className="text-orange-400 font-bold text-sm uppercase mb-1">Nagad (Send Money)</p>
                   <button 
                     onClick={() => {
-                      navigator.clipboard.writeText('01768705593');
+                      navigator.clipboard.writeText('01996575260');
                       setCopiedNumber('nagad');
                       setTimeout(() => setCopiedNumber(null), 2000);
                     }}
                     className="text-2xl font-mono text-white hover:text-gold transition-colors flex items-center justify-center gap-2 mx-auto"
                   >
-                    01768705593
+                    01996575260
                   </button>
                   <AnimatePresence>
                     {copiedNumber === 'nagad' && (
