@@ -187,6 +187,7 @@ const LandingPage = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [lightboxData, setLightboxData] = useState<{ images: string[], index: number } | null>(null);
+  const [copiedNumber, setCopiedNumber] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -204,15 +205,21 @@ const LandingPage = () => {
         const defaultHero = [
           {
             id: '1',
-            url: "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=1920",
+            url: "https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&q=80&w=1920",
             title: "ইফতার মাহফিলে এস এস সি ব্যাচ ২০১৯",
             subtitle: "নকলা সরকারি পাইলট উচ্চ বিদ্যালয়"
           },
           {
             id: '2',
-            url: "https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&q=80&w=1920",
+            url: "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=1920",
             title: "স্মৃতির আঙিনায় মিলনমেলা",
             subtitle: "এস এস সি ব্যাচ ২০১৯"
+          },
+          {
+            id: '3',
+            url: "https://images.unsplash.com/photo-1590077428593-a55bb07c4665?auto=format&fit=crop&q=80&w=1920",
+            title: "ঐতিহ্যের বন্ধনে আমরা এক",
+            subtitle: "পবিত্র মাহে রমজান ২০২৬"
           }
         ];
         setHeroSlides(defaultHero);
@@ -409,6 +416,97 @@ const LandingPage = () => {
                 )}
               </AnimatePresence>
             </form>
+          </motion.div>
+
+          {/* Payment Section */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            whileInView={{ opacity: 1, y: 0 }} 
+            className="mt-12 glass-card p-8 border-gold/20"
+          >
+            <h3 className="text-2xl font-bold text-gold text-center mb-8">পেমেন্ট পদ্ধতি</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* bKash */}
+              <div className="bg-white/5 rounded-2xl p-6 border border-white/10 text-center space-y-4">
+                <div className="w-full aspect-square rounded-xl overflow-hidden border-2 border-pink-500/30">
+                  <img 
+                    src={`${window.location.origin}/api/attachments/6306e938-164e-4869-939e-49f38139d479`} 
+                    alt="bKash QR" 
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+                <div className="relative">
+                  <p className="text-pink-400 font-bold text-sm uppercase mb-1">bKash (Send Money)</p>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText('01768705593');
+                      setCopiedNumber('bkash');
+                      setTimeout(() => setCopiedNumber(null), 2000);
+                    }}
+                    className="text-2xl font-mono text-white hover:text-gold transition-colors flex items-center justify-center gap-2 mx-auto"
+                  >
+                    01768705593
+                  </button>
+                  <AnimatePresence>
+                    {copiedNumber === 'bkash' && (
+                      <motion.span 
+                        initial={{ opacity: 0, y: 10 }} 
+                        animate={{ opacity: 1, y: 0 }} 
+                        exit={{ opacity: 0 }}
+                        className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gold text-emerald-950 text-[10px] px-2 py-1 rounded font-bold"
+                      >
+                        Number copied
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Nagad */}
+              <div className="bg-white/5 rounded-2xl p-6 border border-white/10 text-center space-y-4">
+                <div className="w-full aspect-square rounded-xl overflow-hidden border-2 border-orange-500/30">
+                  <img 
+                    src={`${window.location.origin}/api/attachments/10899478-43d9-482f-8700-11756be9f28d`} 
+                    alt="Nagad QR" 
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+                <div className="relative">
+                  <p className="text-orange-400 font-bold text-sm uppercase mb-1">Nagad (Send Money)</p>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText('01768705593');
+                      setCopiedNumber('nagad');
+                      setTimeout(() => setCopiedNumber(null), 2000);
+                    }}
+                    className="text-2xl font-mono text-white hover:text-gold transition-colors flex items-center justify-center gap-2 mx-auto"
+                  >
+                    01768705593
+                  </button>
+                  <AnimatePresence>
+                    {copiedNumber === 'nagad' && (
+                      <motion.span 
+                        initial={{ opacity: 0, y: 10 }} 
+                        animate={{ opacity: 1, y: 0 }} 
+                        exit={{ opacity: 0 }}
+                        className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gold text-emerald-950 text-[10px] px-2 py-1 rounded font-bold"
+                      >
+                        Number copied
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+              <p className="text-red-400 text-sm text-center font-medium">
+                <span className="font-bold">বিঃ দ্রঃ</span> সেন্ড মানি করার সময় অবশ্যই আপনার নাম দিবেন এবং ৫ টাকা ক্যাশ আউট ফী যোগ করবেন।
+              </p>
+            </div>
           </motion.div>
         </div>
       </section>
