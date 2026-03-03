@@ -77,6 +77,7 @@
 
   .gallery-item img {
     @apply w-full h-full object-cover transition-transform duration-700;
+    image-rendering: -webkit-optimize-contrast;
   }
 
   .gallery-item:hover img {

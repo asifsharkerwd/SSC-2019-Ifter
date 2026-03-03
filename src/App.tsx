@@ -122,8 +122,12 @@ const compressImage = (base64Str: string, maxWidth = 800, maxHeight = 800): Prom
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
-      ctx?.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/jpeg', 0.5)); // Compress to 50% quality JPEG
+      if (ctx) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, width, height);
+      }
+      resolve(canvas.toDataURL('image/jpeg', 0.8)); // Increased quality to 80%
     };
   });
 };
@@ -290,7 +294,7 @@ const LandingPage = () => {
       reader.readAsDataURL(photo);
       reader.onload = async () => {
         const base64Image = reader.result as string;
-        const compressedImage = await compressImage(base64Image, 200, 200);
+        const compressedImage = await compressImage(base64Image, 800, 800);
         
         const { error } = await supabase.from('registrations').insert([
           {
@@ -802,7 +806,7 @@ const AdminDashboard = () => {
       reader.readAsDataURL(file);
       reader.onload = async () => {
         const base64Image = reader.result as string;
-        const compressedImage = await compressImage(base64Image, 200, 200);
+        const compressedImage = await compressImage(base64Image, 800, 800);
         
         const { error } = await supabase
           .from('registrations')
