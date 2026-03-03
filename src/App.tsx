@@ -220,6 +220,12 @@ const LandingPage = () => {
             url: "https://images.unsplash.com/photo-1590077428593-a55bb07c4665?auto=format&fit=crop&q=80&w=1920",
             title: "ঐতিহ্যের বন্ধনে আমরা এক",
             subtitle: "পবিত্র মাহে রমজান ২০২৬"
+          },
+          {
+            id: '4',
+            url: "https://images.unsplash.com/photo-1519491050282-ce00c729c8bf?auto=format&fit=crop&q=80&w=1920",
+            title: "বরকতময় ইফতারের আয়োজন",
+            subtitle: "এস এস সি ব্যাচ ২০১৯"
           }
         ];
         setHeroSlides(defaultHero);
@@ -427,14 +433,13 @@ const LandingPage = () => {
             <h3 className="text-2xl font-bold text-gold text-center mb-8">পেমেন্ট পদ্ধতি</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* bKash */}
+          {/* bKash */}
               <div className="bg-white/5 rounded-2xl p-6 border border-white/10 text-center space-y-4">
-                <div className="w-full aspect-square rounded-xl overflow-hidden border-2 border-pink-500/30">
+                <div className="w-full aspect-square rounded-xl overflow-hidden border-2 border-pink-500/30 bg-white/5">
                   <img 
-                    src={`${window.location.origin}/api/attachments/6306e938-164e-4869-939e-49f38139d479`} 
+                    src="https://i.ibb.co.com/ddyW03V/Bkash.png" 
                     alt="bKash QR" 
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-contain"
                   />
                 </div>
                 <div className="relative">
@@ -466,12 +471,11 @@ const LandingPage = () => {
 
               {/* Nagad */}
               <div className="bg-white/5 rounded-2xl p-6 border border-white/10 text-center space-y-4">
-                <div className="w-full aspect-square rounded-xl overflow-hidden border-2 border-orange-500/30">
+                <div className="w-full aspect-square rounded-xl overflow-hidden border-2 border-orange-500/30 bg-white/5">
                   <img 
-                    src={`${window.location.origin}/api/attachments/10899478-43d9-482f-8700-11756be9f28d`} 
+                    src="https://i.ibb.co.com/7dND4T1c/Nagod.png" 
                     alt="Nagad QR" 
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-contain"
                   />
                 </div>
                 <div className="relative">
