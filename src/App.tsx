@@ -98,7 +98,7 @@ const syncToGoogleSheets = async (data: any) => {
   }
 };
 
-const compressImage = (base64Str: string, maxWidth = 800, maxHeight = 800): Promise<string> => {
+const compressImage = (base64Str: string, maxWidth = 400, maxHeight = 400): Promise<string> => {
   return new Promise((resolve) => {
     const img = new Image();
     img.src = base64Str;
@@ -124,10 +124,10 @@ const compressImage = (base64Str: string, maxWidth = 800, maxHeight = 800): Prom
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+        ctx.imageSmoothingQuality = 'medium';
         ctx.drawImage(img, 0, 0, width, height);
       }
-      resolve(canvas.toDataURL('image/jpeg', 0.8)); // Increased quality to 80%
+      resolve(canvas.toDataURL('image/jpeg', 0.6)); // Reduced quality to 60% for better performance
     };
   });
 };
@@ -169,6 +169,7 @@ const Lightbox = ({ images, initialIndex, onClose }: { images: string[], initial
               src={img} 
               alt={`Gallery ${idx}`} 
               className="max-w-full max-h-full object-contain"
+              loading="lazy"
             />
           </SwiperSlide>
         ))}
@@ -196,78 +197,87 @@ const LandingPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const loadData = async () => {
-      // Fetch registrations
-      const { data: regs } = await supabase.from('registrations').select('*');
-      if (regs) setRegistrations(regs);
+    const fetchRegs = async () => {
+      const { data } = await supabase.from('registrations').select('*');
+      if (data) setRegistrations(data);
+    };
 
-      // Fetch hero slides
-      const { data: hero } = await supabase.from('hero').select('*').order('id', { ascending: true });
-      if (hero && hero.length > 0) {
-        setHeroSlides(hero);
+    const fetchHero = async () => {
+      const { data } = await supabase.from('hero').select('*').order('id', { ascending: true });
+      if (data && data.length > 0) {
+        setHeroSlides(data);
       } else {
         const defaultHero = [
           {
             id: '1',
-            url: "https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&q=80&w=1920",
+            url: "https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&q=60&w=800",
             title: "ইফতার মাহফিলে এস এস সি ব্যাচ ২০১৯",
             subtitle: "নকলা সরকারি পাইলট উচ্চ বিদ্যালয়"
           },
           {
             id: '2',
-            url: "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=1920",
+            url: "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=60&w=800",
             title: "স্মৃতির আঙিনায় মিলনমেলা",
             subtitle: "এস এস সি ব্যাচ ২০১৯"
           },
           {
             id: '3',
-            url: "https://images.unsplash.com/photo-1590077428593-a55bb07c4665?auto=format&fit=crop&q=80&w=1920",
+            url: "https://images.unsplash.com/photo-1590077428593-a55bb07c4665?auto=format&fit=crop&q=60&w=800",
             title: "ঐতিহ্যের বন্ধনে আমরা এক",
             subtitle: "পবিত্র মাহে রমজান ২০২৬"
           },
           {
             id: '4',
-            url: "https://images.unsplash.com/photo-1519491050282-ce00c729c8bf?auto=format&fit=crop&q=80&w=1920",
+            url: "https://images.unsplash.com/photo-1519491050282-ce00c729c8bf?auto=format&fit=crop&q=60&w=800",
             title: "বরকতময় ইফতারের আয়োজন",
             subtitle: "এস এস সি ব্যাচ ২০১৯"
           }
         ];
         setHeroSlides(defaultHero);
       }
-
-      // Fetch event date from settings
-      const { data: settings } = await supabase.from('settings').select('*').eq('key', 'event_date').single();
-      if (settings) setEventDate(settings.value);
-
-      // Fetch gallery
-      const { data: gallery } = await supabase.from('gallery').select('*').order('created_at', { ascending: false });
-      if (gallery) setGalleryImages(gallery);
     };
 
-    loadData();
+    const fetchSettings = async () => {
+      const { data } = await supabase.from('settings').select('*').eq('key', 'event_date').single();
+      if (data) setEventDate(data.value);
+    };
+
+    const fetchGallery = async () => {
+      const { data } = await supabase.from('gallery').select('*').order('created_at', { ascending: false });
+      if (data) setGalleryImages(data);
+    };
+
+    const loadAllData = () => {
+      fetchRegs();
+      fetchHero();
+      fetchSettings();
+      fetchGallery();
+    };
+
+    loadAllData();
 
     // Set up real-time subscriptions
-    const regsSubscription = supabase.channel('registrations_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'registrations' }, loadData)
+    const regsSub = supabase.channel('registrations_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'registrations' }, fetchRegs)
       .subscribe();
     
-    const gallerySubscription = supabase.channel('gallery_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery' }, loadData)
+    const gallerySub = supabase.channel('gallery_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery' }, fetchGallery)
       .subscribe();
 
-    const heroSubscription = supabase.channel('hero_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'hero' }, loadData)
+    const heroSub = supabase.channel('hero_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'hero' }, fetchHero)
       .subscribe();
 
-    const settingsSubscription = supabase.channel('settings_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, loadData)
+    const settingsSub = supabase.channel('settings_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, fetchSettings)
       .subscribe();
 
     return () => {
-      supabase.removeChannel(regsSubscription);
-      supabase.removeChannel(gallerySubscription);
-      supabase.removeChannel(heroSubscription);
-      supabase.removeChannel(settingsSubscription);
+      supabase.removeChannel(regsSub);
+      supabase.removeChannel(gallerySub);
+      supabase.removeChannel(heroSub);
+      supabase.removeChannel(settingsSub);
     };
   }, []);
 
@@ -444,6 +454,7 @@ const LandingPage = () => {
                     src="https://i.ibb.co.com/ddyW03V/Bkash.png" 
                     alt="bKash QR" 
                     className="w-full h-full object-contain"
+                    loading="lazy"
                   />
                 </div>
                 <div className="relative">
@@ -480,6 +491,7 @@ const LandingPage = () => {
                     src="https://i.ibb.co.com/7dND4T1c/Nagod.png" 
                     alt="Nagad QR" 
                     className="w-full h-full object-contain"
+                    loading="lazy"
                   />
                 </div>
                 <div className="relative">
@@ -537,7 +549,7 @@ const LandingPage = () => {
                     className="aspect-square overflow-hidden cursor-pointer" 
                     onClick={() => setLightboxData({ images: approvedGuests.map(g => g.photo_url), index: idx })}
                   >
-                    <img src={guest.photo_url} alt={guest.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                    <img src={guest.photo_url} alt={guest.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
                   </div>
                   <div className="p-3 text-center bg-black/40">
                     <h3 className="text-white text-[16px] font-bold truncate mb-0.5">{guest.name}</h3>
@@ -580,7 +592,7 @@ const LandingPage = () => {
                   className="gallery-item"
                   onClick={() => setLightboxData({ images: galleryImages.map(i => i.url), index: idx })}
                 >
-                  <img src={img.url} alt="Gallery" />
+                  <img src={img.url} alt="Gallery" loading="lazy" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
                     <Plus className="text-gold w-8 h-8" />
                   </div>
@@ -806,7 +818,7 @@ const AdminDashboard = () => {
       reader.readAsDataURL(file);
       reader.onload = async () => {
         const base64Image = reader.result as string;
-        const compressedImage = await compressImage(base64Image, 800, 800);
+        const compressedImage = await compressImage(base64Image, 400, 400);
         
         const { error } = await supabase
           .from('registrations')
@@ -833,7 +845,7 @@ const AdminDashboard = () => {
       reader.readAsDataURL(file);
       reader.onload = async () => {
         const base64Image = reader.result as string;
-        const compressedImage = await compressImage(base64Image, 1200, 1200);
+        const compressedImage = await compressImage(base64Image, 800, 800);
         
         const { data, error } = await supabase.from('gallery').insert([
           {
@@ -859,7 +871,7 @@ const AdminDashboard = () => {
       reader.readAsDataURL(file);
       reader.onload = async () => {
         const base64Image = reader.result as string;
-        const compressedImage = await compressImage(base64Image, 1280, 720);
+        const compressedImage = await compressImage(base64Image, 1024, 576);
         
         if (replacingId) {
           const { error } = await supabase.from('hero').update({ url: compressedImage }).eq('id', replacingId);
@@ -1114,7 +1126,7 @@ const AdminDashboard = () => {
                         <tr key={reg.id} className="hover:bg-white/5 transition-colors">
                           <td className="p-4">
                             <div className="relative group/photo w-12 h-12">
-                              <img src={reg.photo_url} className="w-12 h-12 rounded-full object-cover border border-gold/30" />
+                              <img src={reg.photo_url} className="w-12 h-12 rounded-full object-cover border border-gold/30" loading="lazy" />
                               <button 
                                 onClick={() => {
                                   setReplacingMemberId(reg.id);
@@ -1191,7 +1203,7 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {galleryImages.map((img) => (
                 <div key={img.id} className="relative group aspect-square rounded-xl overflow-hidden border border-white/10">
-                  <img src={img.url} className="w-full h-full object-cover" />
+                  <img src={img.url} className="w-full h-full object-cover" loading="lazy" />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button onClick={() => deleteGalleryImage(img.id)} className="p-2 bg-red-500 text-white rounded-full hover:scale-110 transition-transform">
                       <Trash2 size={20} />
@@ -1238,7 +1250,7 @@ const AdminDashboard = () => {
               {heroSlides.map((slide) => (
                 <div key={slide.id} className="glass-card overflow-hidden group">
                   <div className="aspect-video relative">
-                    <img src={slide.url} className="w-full h-full object-cover" />
+                    <img src={slide.url} className="w-full h-full object-cover" loading="lazy" />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-4">
                       <button 
                         onClick={() => {
